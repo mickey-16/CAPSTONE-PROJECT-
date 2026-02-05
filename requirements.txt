@@ -1,0 +1,7 @@
+kagglehub
+pandas
+openpyxl
+scikit-learn
+numpy
+streamlit
+plotly
