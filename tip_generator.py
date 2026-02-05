@@ -64,46 +64,88 @@ class TipGenerator:
     
     def generate_rule_based_tips(self, user_input: Dict) -> List[str]:
         """
-        Level 1: Generate tips based on simple if/else rules
+        Level 1: Generate tips based on actual INPUT values
+        Prioritizes areas with highest impact
         """
         tips = []
+        priorities = []  # Track priority areas
         
-        # Transport mode tip
+        # Get input values
         transport = user_input.get('transport_mode', '')
-        if transport in self.tip_database['transport_mode']:
-            tips.append(self.tip_database['transport_mode'][transport])
-        
-        # Electricity usage tip
-        electricity = user_input.get('electricity_kwh', 0)
-        if electricity > 10:
-            tips.append(self.tip_database['electricity']['high'])
-        elif electricity > 6:
-            tips.append(self.tip_database['electricity']['medium'])
-        else:
-            tips.append(self.tip_database['electricity']['low'])
-        
-        # Food type tip
-        food = user_input.get('food_type', '')
-        if food in self.tip_database['food']:
-            tips.append(self.tip_database['food'][food])
-        
-        # Screen time tip
-        screen_time = user_input.get('screen_time_hours', 0)
-        if screen_time > 8:
-            tips.append(self.tip_database['screen_time']['high'])
-        elif screen_time > 4:
-            tips.append(self.tip_database['screen_time']['medium'])
-        else:
-            tips.append(self.tip_database['screen_time']['low'])
-        
-        # Distance tip
         distance = user_input.get('distance_km', 0)
-        if distance > 50:
-            tips.append(self.tip_database['distance']['high'])
-        elif distance > 20:
-            tips.append(self.tip_database['distance']['medium'])
+        electricity = user_input.get('electricity_kwh', 0)
+        food = user_input.get('food_type', '')
+        screen_time = user_input.get('screen_time_hours', 0)
+        
+        # Electricity usage (highest impact factor - 31%)
+        if electricity > 15:
+            tips.append("💡 PRIORITY: Your electricity usage is very high (>15 kWh/day). Switch to LED bulbs, unplug devices when not in use, and use energy-efficient appliances.")
+            priorities.append('electricity')
+        elif electricity > 10:
+            tips.append("💡 Your electricity usage is high. Try using smart plugs, reducing AC/heating, and turning off lights in unused rooms.")
+            priorities.append('electricity')
+        elif electricity > 6:
+            tips.append("⚡ Consider reducing electricity usage with energy-efficient devices and mindful consumption.")
         else:
-            tips.append(self.tip_database['distance']['low'])
+            tips.append("✅ Your electricity usage is well-managed. Keep up the good work!")
+        
+        # Food type (second highest impact - 21-15%)
+        if food == 'Non-Veg':
+            tips.append("🍖 PRIORITY: Meat-based diets have high emissions. Try 'Meatless Mondays', reduce red meat, or switch to a Mixed diet to cut emissions by 20-30%.")
+            priorities.append('food')
+        elif food == 'Mixed':
+            tips.append("🥗 Good balance! Consider more plant-based meals to further reduce your footprint. Even 1-2 vegetarian days per week helps.")
+        else:
+            tips.append("🌱 Excellent! Plant-based diets have the lowest carbon footprint. You're making a great impact!")
+        
+        # Screen time (affects electricity)
+        if screen_time > 16:
+            tips.append("📱 PRIORITY: Very high screen time (>16 hrs/day). Digital detox recommended. Reduce screen time to 8-10 hours to save energy and improve health.")
+            priorities.append('screen')
+        elif screen_time > 10:
+            tips.append("📱 High screen time increases electricity use. Try setting screen-free hours, especially before bed.")
+            priorities.append('screen')
+        elif screen_time > 6:
+            tips.append("⏰ Moderate screen time. Consider reducing by 2-3 hours daily to save energy.")
+        else:
+            tips.append("✅ Your screen time is well-balanced. Great job!")
+        
+        # Transport mode and distance (combined impact)
+        if distance == 0:
+            tips.append("🏠 Excellent! Zero travel means zero transport emissions. Perfect if working from home!")
+        elif distance > 0:
+            if transport == 'Car':
+                if distance > 50:
+                    tips.append("🚗 PRIORITY: High car usage (>50 km/day). Consider carpooling, switching to Bus/EV, or remote work 2-3 days/week to reduce emissions by 40%.")
+                    priorities.append('transport')
+                elif distance > 20:
+                    tips.append("🚗 Moderate car usage. Try carpooling or switching to public transport for some trips. Even 2 days of Bus can reduce emissions by 25%.")
+                    priorities.append('transport')
+                else:
+                    tips.append("🚗 Low-distance car travel. Consider biking or walking for short trips under 5 km.")
+            elif transport == 'Bus':
+                if distance > 50:
+                    tips.append("🚌 Long bus commutes. Great eco-choice! Consider remote work if possible to reduce travel time.")
+                else:
+                    tips.append("🚌 Excellent choice! Public transport is eco-friendly. Keep it up!")
+            elif transport == 'EV':
+                if distance > 50:
+                    tips.append("⚡ EV for long distances - great choice! Ensure you charge with renewable energy if available.")
+                else:
+                    tips.append("⚡ Electric vehicles are excellent! Clean and efficient transportation.")
+            elif transport == 'Bike':
+                if distance > 20:
+                    tips.append("🚴 Long-distance biking is impressive! You're carbon-neutral and fit. Amazing!")
+                else:
+                    tips.append("🚴 Biking is carbon-neutral and healthy. Excellent choice!")
+            elif transport == 'Walk':
+                tips.append("🚶 Walking is the best for the environment! You're doing great!")
+        
+        # Add summary tip based on priorities
+        if len(priorities) >= 3:
+            tips.insert(0, "⚠️ FOCUS AREAS: You have multiple high-impact areas. Start with electricity and food changes for biggest impact.")
+        elif len(priorities) >= 2:
+            tips.insert(0, f"💡 TIP: Focus on {' and '.join(priorities)} for the most significant emission reductions.")
         
         return tips
     
